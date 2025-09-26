@@ -25,7 +25,7 @@ Our platform is designed to:
   Allow partners and customers to integrate directly with Biovega systems, automating common workflows and reducing manual effort.
 
 - **Scale for the Future**  
-  Build a robust foundation that will support additional digital services as our offering grows.
+  Build a robust foundation that will support additional digital services as our offering grows. dsfds
 
 ---
 
