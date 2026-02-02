@@ -1,3 +1,9 @@
+---
+title: tools
+nav_order: 2
+layout: default
+---
+
 # Biovega Services Tool
 
 This repository contains tools, scripts, and configuration files used to support the **Biovega Service** projects and related services.
