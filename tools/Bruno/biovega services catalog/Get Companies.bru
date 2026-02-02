@@ -1,0 +1,15 @@
+meta {
+  name: Get Companies
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{server}}/odata/companies
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
