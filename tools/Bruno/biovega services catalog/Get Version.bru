@@ -1,0 +1,15 @@
+meta {
+  name: Get Version
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{server}}/api/v1/catalog/core/version
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}

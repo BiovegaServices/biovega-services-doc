@@ -1,0 +1,19 @@
+meta {
+  name: Get Products
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{server}}/odata/products?companyId={{companyId}}
+  body: none
+  auth: bearer
+}
+
+params:query {
+  companyId: {{companyId}}
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
