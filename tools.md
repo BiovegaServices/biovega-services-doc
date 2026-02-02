@@ -13,7 +13,7 @@ This repository contains tools, scripts, and configuration files used to support
 ## Repository Contents
 
 - **Bruno Collection** – Example requests for testing and exploring the Biovega Service Catalog API  
-  ➡ [Open Bruno Collection Folder](./Bruno))
+  ➡ [Open Bruno Collection Folder](./tools/Bruno))
 
 *(More tools and scripts will be added here as the project evolves.)*
 
