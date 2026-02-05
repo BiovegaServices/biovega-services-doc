@@ -8,7 +8,7 @@ layout: default
 
 You can view the full interactive REST API documentation here:
 
-<a href="https://biovega-catalog-dev-aacbfwfudee9dmd3.westeurope-01.azurewebsites.net/swagger/index.html" target="_blank" rel="noopener">Launch Swagger UI ↗</a>
+<a href="https://platform.biovega.hr/swagger/index.html" target="_blank" rel="noopener">Launch Swagger UI ↗</a>
 
 ---
 
