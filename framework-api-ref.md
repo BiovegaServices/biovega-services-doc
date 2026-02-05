@@ -12,6 +12,6 @@ You can view the full interactive REST API documentation here:
 
 ---
 
-Next: [Tutorial]({{ site.baseurl }}/tutorial)
+Next: [Tools]({{ site.baseurl }}/tools)
 
 ---
