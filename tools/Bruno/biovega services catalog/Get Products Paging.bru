@@ -1,0 +1,21 @@
+meta {
+  name: Get Products Paging
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{server}}/odata/products?companyId={{companyId}}&$top=100&$skip=200
+  body: none
+  auth: bearer
+}
+
+params:query {
+  companyId: {{companyId}}
+  $top: 100
+  $skip: 200
+}
+
+auth:bearer {
+  token: {{access_token}}
+}

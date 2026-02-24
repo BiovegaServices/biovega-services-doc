@@ -1,0 +1,19 @@
+meta {
+  name: Get Stores Shipping
+  type: http
+  seq: 11
+}
+
+get {
+  url: {{server}}/odata/stores/shipping?companyId={{companyId}}
+  body: none
+  auth: bearer
+}
+
+params:query {
+  companyId: {{companyId}}
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
