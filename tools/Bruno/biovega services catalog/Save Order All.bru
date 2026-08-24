@@ -1,0 +1,187 @@
+meta {
+  name: Save Order All
+  type: http
+  seq: 17
+}
+
+post {
+  url: {{server}}/odata/v1/orders?companyId={{companyId}}
+  body: json
+  auth: bearer
+}
+
+params:query {
+  companyId: {{companyId}}
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "orderNumber": "WEB-2026-000124",
+    "status": "Pending",
+    "isR1Invoice": true,
+    "notes": "Dostava poslije 17h, pozvoniti na susjeda.",
+    "shippingAmount": 4.99,
+    "paymentMethodId": 1,
+    "customerCardId": null,
+    "customer": {
+      "customerId": "00000000-0000-0000-0000-000000000000",
+      "firstName": "Ana",
+      "lastName": "Horvat",
+      "email": "ana.horvat@example.com",
+      "phone": "+385 1 2345 678",
+      "mobile": "+385 91 234 5678",
+      "gender": "F",
+      "dateOfBirth": "1990-05-14",
+      "householdSize": 3,
+      "childrenCount": 1
+    },
+    "deliveryAddressId": null,
+    "deliveryAddressTypeId": 2,
+    "deliveryRecipientName": "Marko Horvat",
+    "deliveryStreet": "Ilica",
+    "deliveryHouseNumber": "1",
+    "deliveryPostalCode": "10000",
+    "deliveryCity": "Zagreb",
+    "deliveryCountry": "HR",
+    "deliveryStoreId": null,
+    "deliveryCarrierId": null,
+    "deliveryPickupPointCode": null,
+    "deliveryPickupPointName": null,
+    "orderItems": [
+      {
+        "productName": "Bio apple juice 1L",
+        "sku": "BIO-AJ-1000",
+        "quantity": 2,
+        "unitPrice": 10.00,
+        "retailPrice": 12.50,
+        "discounts": [
+          { "discountTypeId": 1, "percentage": 10.00, "sortOrder": 0 },
+          { "discountTypeId": 2, "percentage": 5.00,  "sortOrder": 1 }
+        ]
+      },
+      {
+        "productName": "Rye bread 500g",
+        "sku": "BRD-RY-500",
+        "quantity": 1,
+        "unitPrice": 3.20,
+        "retailPrice": 3.90
+      },
+      {
+        "productName": "Olive oil 1L",
+        "sku": "OIL-OL-1000",
+        "quantity": 3,
+        "unitPrice": 8.00,
+        "retailPrice": 9.50,
+        "discounts": [
+          { "discountTypeId": 1, "percentage": 10.00, "sortOrder": 0 }
+        ]
+      }
+    ]
+  }
+}
+
+script:post-response {
+  if (res.getStatus() === 201) {
+    const data = res.getBody();
+    bru.setEnvVar("orderId", data.orderId);
+    if (data.customer) {
+      bru.setEnvVar("customerId", data.customer.customerId);
+    }
+    if (data.orderItems && data.orderItems.length > 0) {
+      bru.setEnvVar("orderItemId", data.orderItems[0].orderItemId);
+    }
+  }
+}
+
+tests {
+  test("status is 201", function() {
+    expect(res.getStatus()).to.equal(201);
+  });
+
+  test("creates the order with all three items", function() {
+    const data = res.getBody();
+    expect(data.orderId).to.be.a("string").and.not.be.empty;
+    expect(data.orderItems).to.have.lengthOf(3);
+  });
+
+  test("discounts are applied to the total", function() {
+    // Item 1: 2 x 10.00, 10% + 5% additive = 15% off -> 17.00
+    // Item 2: 1 x 3.20, no discount                    ->  3.20
+    // Item 3: 3 x  8.00, 10% off -> 7.20/unit          -> 21.60
+    // Total                                             -> 41.80
+    expect(res.getBody().totalAmount).to.equal(41.8);
+  });
+
+  test("order header fields are persisted", function() {
+    const data = res.getBody();
+    expect(data.isR1Invoice).to.equal(true);
+    expect(data.paymentMethodId).to.equal(1);
+    expect(data.shippingAmount).to.equal(4.99);
+  });
+
+  test("delivery destination is snapshotted onto the order", function() {
+    const data = res.getBody();
+    expect(data.deliveryAddressTypeId).to.equal(2);
+    expect(data.deliveryCity).to.equal("Zagreb");
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  FULL PAYLOAD — the whole Order/OrderItem structure in ONE call: customer +
+  order header + delivery destination + items + per-line discounts, all written
+  in a single transaction (a failing item rolls the entire order back).
+
+  IDs BELOW ARE THIS DEV DATABASE'S — they differ per environment. Read them
+  from Get Address Types / Get Payment Methods / Get Discount Types / Get
+  Carriers rather than assuming:
+      addressTypeId  1=BILLING 2=DELIVERY 3=HOME 4=WORK 5=OTHER
+                     7=PARCEL_LOCKER 8=STORE_PICKUP
+      paymentMethodId 1=CARD_ONLINE 2=CARD_ON_DELIVERY 3=COD 4=BANK_TRANSFER
+      discountTypeId  1=PROMOTION 2=LOYALTY 3=COUPON ...
+
+  DELIVERY — two ways, both snapshotted onto the order (convention 7), so later
+  edits/deletion of an address can never rewrite where the order was sent:
+    1. Pick a saved address:  "deliveryAddressId": "<CustomerAddress id>"
+       The server resolves it and freezes its fields onto the order; every
+       delivery* field below is then ignored. Must belong to this company (and
+       to this customer when an existing customerId is given), else 400.
+    2. Ad-hoc (this example): set deliveryAddressTypeId + the fields its kind
+       requires — validated app-side because the DB has no CHECK constraints:
+         DELIVERY/BILLING -> deliveryStreet
+         PARCEL_LOCKER    -> deliveryCarrierId + deliveryPickupPointCode
+                             (street/city hold the locker's snapshot)
+         STORE_PICKUP     -> deliveryStoreId, a store of THIS company
+       Omit deliveryAddressTypeId entirely for an order with no destination.
+
+  OTHER VALIDATION: orderNumber must be unique per company (else 409); status
+  must be a known OrderStatuses value; paymentMethodId and every discountTypeId
+  must exist; customerCardId must belong to this company.
+
+  SHIPPING: shippingAmount is the delivery cost, carried SEPARATELY from
+  totalAmount (which stays the items' discounted total — grand total is
+  totalAmount + shippingAmount on the caller's side). Negative values are 400;
+  omitted means 0. Set at creation; updates don't touch it.
+
+  WHAT PERSISTS vs. ILLUSTRATIVE:
+    - Customer: the FULL profile persists on create — firstName/lastName/email
+      plus phone/mobile/gender/dateOfBirth/householdSize/childrenCount/
+      webUserId, all forwarded to spEdit_Customer. primaryAddressId is the one
+      exception (400 — a brand-new customer has no addresses yet).
+    - customerId = empty GUID triggers MATCH-OR-CREATE within the company:
+      matched by webUserId first, then email. A match refreshes the profile
+      (omitted fields keep their values), no match creates a new customer —
+      so repeat buyers never duplicate. Send a real customerId to attach an
+      existing customer (its profile is then NOT touched by this call).
+    - Items: productName/sku are snapshots taken at order time. Each discount
+      sets exactly ONE of percentage or amount; percentages are additive
+      (10% + 5% = 15%, not compounded).
+}

@@ -1,7 +1,7 @@
 meta {
   name: Get Token
   type: http
-  seq: 1
+  seq: 2
 }
 
 post {
@@ -27,11 +27,21 @@ body:form-urlencoded {
 script:post-response {
   // Bruno automatically parses JSON responses
   const data = res.body;
-  
+
   // Save the access token into an environment variable
   bru.setEnvVar("access_token", data.access_token);
-  
+
   // Optional: confirm it worked
   console.log("Access token saved to environment");
-  
+
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("returns an access token", function() {
+    expect(res.getBody().access_token).to.be.a("string").and.not.be.empty;
+  });
 }

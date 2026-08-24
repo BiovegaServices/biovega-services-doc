@@ -1,0 +1,41 @@
+meta {
+  name: Get Loyalty Programs
+  type: http
+  seq: 31
+}
+
+get {
+  url: {{server}}/odata/v1/LoyaltyPrograms?companyId={{companyId}}
+  body: none
+  auth: bearer
+}
+
+params:query {
+  companyId: {{companyId}}
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+script:post-response {
+  if (res.getStatus() === 200) {
+    const body = res.getBody();
+    const rows = body.value ?? body;
+    const active = rows.find(p => (p.IsActive ?? p.isActive)) ?? rows[0];
+    if (active) {
+      bru.setEnvVar("loyaltyProgramId", active.LoyaltyProgramId ?? active.loyaltyProgramId);
+    }
+  }
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("returns a result list", function() {
+    const body = res.getBody();
+    expect(body.value ?? body).to.be.an("array");
+  });
+}

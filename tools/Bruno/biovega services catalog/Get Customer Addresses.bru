@@ -1,0 +1,45 @@
+meta {
+  name: Get Customer Addresses
+  type: http
+  seq: 47
+}
+
+get {
+  url: {{server}}/odata/v1/Customers/{{customerId}}/addresses?companyId={{companyId}}
+  body: none
+  auth: bearer
+}
+
+params:query {
+  companyId: {{companyId}}
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+docs {
+  The addresses of ONE customer. companyId is still mandatory — it scopes
+  the lookup through the customer (a customer of another company gives 404).
+  Soft-deleted addresses are excluded.
+
+  AddressType and Carrier are [AutoExpand], so each address already carries
+  its type (BILLING / DELIVERY / PARCEL_LOCKER / STORE_PICKUP) and, for
+  lockers, its carrier.
+
+  customerId is captured by Save Customer / Save Order.
+  For every customer's addresses at once, use Get Customers ($expand=Addresses).
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("returns this customer's addresses only", function() {
+    const rows = res.getBody().value ?? res.getBody();
+    expect(rows).to.be.an("array");
+    const customerId = bru.getEnvVar("customerId");
+    rows.forEach(a => expect(a.customerId ?? a.CustomerId).to.equal(customerId));
+  });
+}

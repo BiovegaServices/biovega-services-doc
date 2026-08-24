@@ -1,0 +1,37 @@
+meta {
+  name: Get Customer Points Balance
+  type: http
+  seq: 32
+}
+
+get {
+  url: {{server}}/odata/v1/CustomerPointsBalances?companyId={{companyId}}&customerId={{customerId}}
+  body: none
+  auth: bearer
+}
+
+params:query {
+  companyId: {{companyId}}
+  customerId: {{customerId}}
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("returns a balance object", function() {
+    const data = res.getBody();
+    const balance = data.PointsBalance ?? data.pointsBalance;
+    expect(balance).to.be.a("number");
+  });
+}
+
+docs {
+  Aggregated from non-expired EARN lots (viCustomerPointsBalance).
+  A customer without loyalty activity gets a zero balance.
+}

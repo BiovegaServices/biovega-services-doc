@@ -1,0 +1,33 @@
+meta {
+  name: Delete Customer Address
+  type: http
+  seq: 52
+}
+
+delete {
+  url: {{server}}/odata/v1/Customers/{{customerId}}/addresses/{{customerAddressId}}?companyId={{companyId}}
+  body: none
+  auth: bearer
+}
+
+params:query {
+  companyId: {{companyId}}
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+docs {
+  Soft delete via spDelete_CustomerAddress — sets IsDeleted and clears the
+  customer's PrimaryAddressId if it pointed at this address. The address
+  disappears from the read endpoints but is never hard-deleted.
+
+  customerAddressId is captured by Save Customer Address.
+}
+
+tests {
+  test("status is 204", function() {
+    expect(res.getStatus()).to.equal(204);
+  });
+}

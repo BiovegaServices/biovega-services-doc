@@ -1,0 +1,40 @@
+meta {
+  name: Get Orders Id
+  type: http
+  seq: 15
+}
+
+get {
+  url: {{server}}/odata/v1/orders?companyId={{companyId}}&OrderId={{orderId}}&$expand=OrderItems
+  body: none
+  auth: bearer
+}
+
+params:query {
+  companyId: {{companyId}}
+  OrderId: {{orderId}}
+  $expand: OrderItems
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("returns exactly one order with items", function() {
+    const body = res.getBody();
+    const rows = body.value ?? body;
+    expect(rows).to.have.lengthOf(1);
+    expect(rows[0].OrderItems ?? rows[0].orderItems).to.be.an("array");
+  });
+}
+
+docs {
+  LEGACY FORM: narrows the list endpoint with ?OrderId= and returns a
+  one-element collection envelope. Prefer Get Order (OData keyed access,
+  /Orders({id})), which returns the entity itself.
+}

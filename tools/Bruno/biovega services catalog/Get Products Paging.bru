@@ -1,11 +1,11 @@
 meta {
   name: Get Products Paging
   type: http
-  seq: 9
+  seq: 11
 }
 
 get {
-  url: {{server}}/odata/products?companyId={{companyId}}&$top=100&$skip=200
+  url: {{server}}/odata/v1/products?companyId={{companyId}}&$top=100&$skip=200
   body: none
   auth: bearer
 }
@@ -18,4 +18,24 @@ params:query {
 
 auth:bearer {
   token: {{access_token}}
+}
+
+docs {
+  Paging is opt-in on the standard Products endpoint. Two ways:
+    - Client-driven (this request): $top / $skip.
+    - Server-driven: ?pageSize=1000 -> response carries @odata.nextLink;
+      follow it until absent.
+  With NEITHER, the endpoint returns ALL products (legacy bulk-load).
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("returns a result list", function() {
+    const body = res.getBody();
+    const rows = body.value ?? body;
+    expect(rows).to.be.an("array");
+  });
 }

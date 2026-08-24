@@ -1,11 +1,11 @@
 meta {
-  name: Get Products
+  name: Get Order Status History
   type: http
-  seq: 7
+  seq: 27
 }
 
 get {
-  url: {{server}}/odata/v1/products?companyId={{companyId}}
+  url: {{server}}/odata/v1/orders/{{orderId}}/statushistory?companyId={{companyId}}
   body: none
   auth: bearer
 }
@@ -22,10 +22,12 @@ tests {
   test("status is 200", function() {
     expect(res.getStatus()).to.equal(200);
   });
-
-  test("returns a result list", function() {
+  
+  test("contains the Paid transition", function() {
     const body = res.getBody();
     const rows = body.value ?? body;
     expect(rows).to.be.an("array");
+    const toStatuses = rows.map(r => r.toStatus ?? r.ToStatus);
+    expect(toStatuses).to.include("Paid");
   });
 }

@@ -1,0 +1,35 @@
+meta {
+  name: Get Customer Id
+  type: http
+  seq: 30
+}
+
+get {
+  url: {{server}}/odata/v1/Customers/{{customerId}}?companyId={{companyId}}
+  body: none
+  auth: bearer
+}
+
+params:query {
+  companyId: {{companyId}}
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("returns the requested customer", function() {
+    const data = res.getBody();
+    const id = data.customerId ?? data.CustomerId;
+    expect(id).to.equal(bru.getEnvVar("customerId"));
+  });
+}
+
+docs {
+  customerId is captured automatically by Save Order / Save Order All.
+}

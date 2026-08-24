@@ -1,0 +1,47 @@
+meta {
+  name: Deactivate Customer Card
+  type: http
+  seq: 55
+}
+
+put {
+  url: {{server}}/odata/v1/Customers/{{customerId}}/cards/{{customerCardId}}?companyId={{companyId}}
+  body: json
+  auth: bearer
+}
+
+params:query {
+  companyId: {{companyId}}
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "customerCardId": "{{customerCardId}}",
+    "isActive": false
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Deactivates the card (e.g. lost/stolen). The body customerCardId must
+  match the route id.
+
+  The same endpoint also REACTIVATES (isActive: true) — which deactivates
+  any other active card of the customer (max one active) — and can correct
+  the card number; an omitted/empty cardNumber keeps the existing one.
+  A cardNumber already used by another card returns 409.
+}
+
+tests {
+  test("status is 204", function() {
+    expect(res.getStatus()).to.equal(204);
+  });
+}

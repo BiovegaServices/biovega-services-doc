@@ -1,11 +1,11 @@
 meta {
   name: Get Stores
   type: http
-  seq: 10
+  seq: 12
 }
 
 get {
-  url: {{server}}/odata/stores?companyId={{companyId}}
+  url: {{server}}/odata/v1/stores?companyId={{companyId}}
   body: none
   auth: bearer
 }
@@ -16,4 +16,16 @@ params:query {
 
 auth:bearer {
   token: {{access_token}}
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("returns a result list", function() {
+    const body = res.getBody();
+    const rows = body.value ?? body;
+    expect(rows).to.be.an("array");
+  });
 }

@@ -1,0 +1,39 @@
+meta {
+  name: Get Products Count
+  type: http
+  seq: 46
+}
+
+get {
+  url: {{server}}/odata/v1/products?companyId={{companyId}}&$count=true&$top=0
+  body: none
+  auth: bearer
+}
+
+params:query {
+  companyId: {{companyId}}
+  $count: true
+  $top: 0
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+docs {
+  Total product count for the company without pulling any rows
+  ($top=0). The total is in @odata.count. Useful to decide page count
+  before paging.
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("returns @odata.count", function() {
+    const body = res.getBody();
+    const count = body["@odata.count"] ?? body.count;
+    expect(count).to.be.a("number");
+  });
+}

@@ -1,0 +1,48 @@
+meta {
+  name: Update OrderItem
+  type: http
+  seq: 23
+}
+
+put {
+  url: {{server}}/odata/v1/orderItems/{{orderItemId}}?companyId={{companyId}}&orderId={{orderId}}
+  body: json
+  auth: bearer
+}
+
+params:query {
+  companyId: {{companyId}}
+  orderId: {{orderId}}
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "orderItemId": "{{orderItemId}}",
+    "orderId": "{{orderId}}",
+    "productName": "Bio apple juice 1L (updated)",
+    "sku": "BIO-AJ-1000",
+    "quantity": 3,
+    "unitPrice": 10.00
+  }
+}
+
+tests {
+  test("status is 204", function() {
+    expect(res.getStatus()).to.equal(204);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Only works while the parent order is Pending — 409 once the order is
+  Paid/Shipped/Delivered/Cancelled. Discounts cannot be changed here
+  (immutable after creation).
+}

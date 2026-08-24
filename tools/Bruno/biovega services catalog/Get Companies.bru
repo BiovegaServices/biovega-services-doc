@@ -1,15 +1,27 @@
 meta {
   name: Get Companies
   type: http
-  seq: 5
+  seq: 6
 }
 
 get {
-  url: {{server}}/odata/companies
+  url: {{server}}/odata/v1/companies
   body: none
   auth: bearer
 }
 
 auth:bearer {
   token: {{access_token}}
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("returns a result list", function() {
+    const body = res.getBody();
+    const rows = body.value ?? body;
+    expect(rows).to.be.an("array");
+  });
 }

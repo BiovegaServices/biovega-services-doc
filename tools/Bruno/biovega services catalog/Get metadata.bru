@@ -1,15 +1,21 @@
 meta {
   name: Get metadata
   type: http
-  seq: 2
+  seq: 3
 }
 
 get {
-  url: {{server}}/odata/$metadata
+  url: {{server}}/odata/v1/$metadata
   body: none
   auth: bearer
 }
 
 auth:bearer {
   token: {{access_token}}
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
 }

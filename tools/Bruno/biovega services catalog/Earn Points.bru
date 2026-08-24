@@ -1,0 +1,54 @@
+meta {
+  name: Earn Points
+  type: http
+  seq: 34
+}
+
+post {
+  url: {{server}}/odata/v1/LoyaltyPointTransactions/earn?companyId={{companyId}}
+  body: json
+  auth: bearer
+}
+
+params:query {
+  companyId: {{companyId}}
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "loyaltyProgramId": "{{loyaltyProgramId}}",
+    "customerId": "{{customerId}}",
+    "orderId": "{{orderId}}",
+    "points": 10,
+    "description": "Bruno collection run earn"
+  }
+}
+
+tests {
+  test("earns points or has no program", function() {
+    expect([200, 404]).to.include(res.getStatus());
+  });
+  
+  test("returns the updated balance on success", function() {
+    if (res.getStatus() === 200) {
+      const data = res.getBody();
+      const balance = data.PointsBalance ?? data.pointsBalance;
+      expect(balance).to.be.at.least(10);
+    }
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Inserts an EARN lot via spLoyalty_EarnPoints and returns the updated
+  balance. loyaltyProgramId is captured by Get Loyalty Programs (seq 29);
+  404 when the company has no loyalty program.
+}

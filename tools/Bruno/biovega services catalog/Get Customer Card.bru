@@ -1,0 +1,44 @@
+meta {
+  name: Get Customer Card
+  type: http
+  seq: 61
+}
+
+get {
+  url: {{server}}/odata/v1/Customers/{{customerId}}/cards/{{customerCardId}}?companyId={{companyId}}
+  body: none
+  auth: bearer
+}
+
+params:query {
+  companyId: {{companyId}}
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Single loyalty card by id — the URL a 201 from Save Customer Card points
+  at. Inactive cards are returned too (history, not deleted). 404 when the
+  card belongs to another customer or the customer is not in this company.
+
+  customerCardId is captured by Save Customer Card.
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("returns the requested card", function() {
+    const data = res.getBody();
+    expect(data.customerCardId).to.equal(bru.getEnvVar("customerCardId"));
+    expect(data.cardNumber).to.be.a("string").and.not.be.empty;
+  });
+}

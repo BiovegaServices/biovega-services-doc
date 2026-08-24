@@ -1,0 +1,62 @@
+meta {
+  name: Save Order
+  type: http
+  seq: 18
+}
+
+post {
+  url: {{server}}/odata/v1/orders?companyId={{companyId}}
+  body: json
+  auth: bearer
+}
+
+params:query {
+  companyId: {{companyId}}
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "orderNumber": "WEB-2026-000123",
+    "status": "Pending",
+    "isR1Invoice": false,
+    "notes": "Deliver after 17h",
+    "customer": {
+      "customerId": "00000000-0000-0000-0000-000000000000",
+      "firstName": "Ana",
+      "lastName": "Horvat",
+      "email": "ana.horvat@example.com"
+    }
+  }
+}
+
+script:post-response {
+  if (res.getStatus() === 201) {
+    const data = res.getBody();
+    bru.setEnvVar("orderId", data.orderId);
+    if (data.customer) {
+      bru.setEnvVar("customerId", data.customer.customerId);
+    }
+  }
+}
+
+tests {
+  test("status is 201", function() {
+    expect(res.getStatus()).to.equal(201);
+  });
+  
+  test("returns the created order with ids", function() {
+    const data = res.getBody();
+    expect(data.orderId).to.be.a("string").and.not.be.empty;
+    expect(data.customerId).to.be.a("string").and.not.be.empty;
+    expect(data.status).to.equal("Pending");
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

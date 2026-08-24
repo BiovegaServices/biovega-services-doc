@@ -1,0 +1,54 @@
+meta {
+  name: Update Customer Address
+  type: http
+  seq: 60
+}
+
+put {
+  url: {{server}}/odata/v1/Customers/{{customerId}}/addresses/{{customerAddressId}}?companyId={{companyId}}
+  body: json
+  auth: bearer
+}
+
+params:query {
+  companyId: {{companyId}}
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "customerAddressId": "{{customerAddressId}}",
+    "addressTypeId": 2,
+    "recipientName": "Baka Marija",
+    "street": "Ilica",
+    "houseNumber": "12",
+    "postalCode": "10000",
+    "city": "Zagreb",
+    "country": "HR",
+    "notes": "Drugi kat, lijevo"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Full replace of the editable fields. The body customerAddressId must match
+  the route id. The same per-kind rules as on create apply (DELIVERY/BILLING
+  need street; PARCEL_LOCKER needs carrierId + pickupPointCode; STORE_PICKUP
+  needs a storeId of this company) — 400 otherwise.
+
+  Existing orders that used this address are NOT affected: the delivery
+  destination was snapshotted onto them at order time.
+}
+
+tests {
+  test("status is 204", function() {
+    expect(res.getStatus()).to.equal(204);
+  });
+}

@@ -1,0 +1,60 @@
+meta {
+  name: Save OrderItem
+  type: http
+  seq: 19
+}
+
+post {
+  url: {{server}}/odata/v1/orderItems?companyId={{companyId}}&orderId={{orderId}}
+  body: json
+  auth: bearer
+}
+
+params:query {
+  companyId: {{companyId}}
+  orderId: {{orderId}}
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "productName": "Bio apple juice 1L",
+    "sku": "BIO-AJ-1000",
+    "quantity": 2,
+    "unitPrice": 10.00,
+    "retailPrice": 12.50,
+    "discounts": [
+      { "discountTypeId": 1, "percentage": 10.00, "sortOrder": 0 },
+      { "discountTypeId": 1, "percentage": 5.00,  "sortOrder": 1 },
+      { "discountTypeId": 2, "amount": 0.50,      "sortOrder": 2 }
+    ]
+  }
+}
+
+script:post-response {
+  if (res.getStatus() === 201) {
+    bru.setEnvVar("orderItemId", res.getBody().orderItemId);
+  }
+}
+
+tests {
+  test("status is 201", function() {
+    expect(res.getStatus()).to.equal(201);
+  });
+  
+  test("returns the created item with computed prices", function() {
+    const data = res.getBody();
+    expect(data.orderItemId).to.be.a("string").and.not.be.empty;
+    // 10% + 5% additive + 0.50 amount discount must lower the unit price
+    expect(data.finalUnitPrice).to.be.below(data.unitPrice);
+    expect(data.discounts).to.have.lengthOf(3);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

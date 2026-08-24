@@ -1,0 +1,51 @@
+meta {
+  name: Get Carriers
+  type: http
+  seq: 58
+}
+
+get {
+  url: {{server}}/odata/v1/Carriers
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+script:post-response {
+  if (res.getStatus() === 200) {
+    const rows = res.getBody().value ?? [];
+    if (rows.length > 0) {
+      bru.setEnvVar("carrierId", rows[0].carrierId ?? rows[0].CarrierId);
+    }
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Global lookup (not tenant-scoped): parcel-locker / delivery carriers. The
+  carrierId is REQUIRED on PARCEL_LOCKER addresses and delivery destinations
+  (see Save Customer Address Locker). Ids differ per environment — read
+  them here, never assume. Captures the first carrierId into the env.
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("returns carriers with id and name", function() {
+    const rows = res.getBody().value;
+    expect(rows).to.be.an("array");
+    if (rows.length > 0) {
+      expect(rows[0]).to.have.property("carrierId");
+      expect(rows[0]).to.have.property("name");
+    }
+  });
+}

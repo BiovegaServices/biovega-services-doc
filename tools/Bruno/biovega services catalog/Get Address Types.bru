@@ -1,21 +1,22 @@
 meta {
-  name: Get Products
+  name: Get Address Types
   type: http
-  seq: 7
+  seq: 48
 }
 
 get {
-  url: {{server}}/odata/v1/products?companyId={{companyId}}
+  url: {{server}}/odata/v1/AddressTypes
   body: none
   auth: bearer
 }
 
-params:query {
-  companyId: {{companyId}}
-}
-
 auth:bearer {
   token: {{access_token}}
+}
+
+docs {
+  Global lookup — no companyId needed. Codes: BILLING, DELIVERY, HOME,
+  WORK, OTHER.
 }
 
 tests {
@@ -25,7 +26,6 @@ tests {
 
   test("returns a result list", function() {
     const body = res.getBody();
-    const rows = body.value ?? body;
-    expect(rows).to.be.an("array");
+    expect(body.value ?? body).to.be.an("array");
   });
 }

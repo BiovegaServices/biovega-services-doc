@@ -1,0 +1,39 @@
+meta {
+  name: Get Products PageSize
+  type: http
+  seq: 44
+}
+
+get {
+  url: {{server}}/odata/v1/products?companyId={{companyId}}&pageSize=1000
+  body: none
+  auth: bearer
+}
+
+params:query {
+  companyId: {{companyId}}
+  pageSize: 1000
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+docs {
+  Server-driven paging (opt-in). Returns up to pageSize rows plus an
+  @odata.nextLink when more exist — follow it until it's absent. Capped
+  at MaxTop (10000). Without pageSize the endpoint returns ALL products.
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("page is bounded by pageSize", function() {
+    const body = res.getBody();
+    const rows = body.value ?? body;
+    expect(rows).to.be.an("array");
+    expect(rows.length).to.be.at.most(1000);
+  });
+}

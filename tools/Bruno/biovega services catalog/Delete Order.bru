@@ -1,0 +1,32 @@
+meta {
+  name: Delete Order
+  type: http
+  seq: 28
+}
+
+delete {
+  url: {{server}}/odata/v1/orders/{{orderId}}?companyId={{companyId}}
+  body: none
+  auth: bearer
+}
+
+params:query {
+  companyId: {{companyId}}
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+tests {
+  test("deletes a pending order or rejects a locked one", function() {
+    expect([204, 409]).to.include(res.getStatus());
+  });
+}
+
+docs {
+  204 while the order is Pending. In a full collection run, Change Order
+  Status (seq 24) has already moved the order to Paid, so this returns
+  409 Conflict — that is the expected outcome of the run and proves the
+  status lock works.
+}

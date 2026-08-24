@@ -1,15 +1,21 @@
 meta {
   name: Get Version
   type: http
-  seq: 3
+  seq: 4
 }
 
 get {
-  url: {{server}}/api/v1/catalog/core/version
+  url: {{server}}/version
   body: none
   auth: bearer
 }
 
 auth:bearer {
   token: {{access_token}}
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
 }
