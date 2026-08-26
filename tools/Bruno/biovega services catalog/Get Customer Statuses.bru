@@ -1,0 +1,39 @@
+meta {
+  name: Get Customer Statuses
+  type: http
+  seq: 57
+}
+
+get {
+  url: {{server}}/odata/v1/CustomerStatuses
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Global lookup (not tenant-scoped): the valid customerStatusId values for
+  Save/Update Customer. Seeded per environment — read the ids from here,
+  never assume them.
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("returns statuses with code and name", function() {
+    const data = res.getBody();
+    expect(data.value).to.be.an("array").that.is.not.empty;
+    expect(data.value[0]).to.have.property("code");
+    expect(data.value[0]).to.have.property("name");
+  });
+}

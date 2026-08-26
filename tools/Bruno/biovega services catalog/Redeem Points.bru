@@ -1,0 +1,54 @@
+meta {
+  name: Redeem Points
+  type: http
+  seq: 35
+}
+
+post {
+  url: {{server}}/odata/v1/LoyaltyPointTransactions/redeem?companyId={{companyId}}
+  body: json
+  auth: bearer
+}
+
+params:query {
+  companyId: {{companyId}}
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "loyaltyProgramId": "{{loyaltyProgramId}}",
+    "customerId": "{{customerId}}",
+    "orderId": "{{orderId}}",
+    "points": 5,
+    "description": "Bruno collection run redeem"
+  }
+}
+
+tests {
+  test("redeems points or has no program", function() {
+    expect([200, 404]).to.include(res.getStatus());
+  });
+  
+  test("returns the updated balance on success", function() {
+    if (res.getStatus() === 200) {
+      const data = res.getBody();
+      const balance = data.PointsBalance ?? data.pointsBalance;
+      expect(balance).to.be.a("number");
+    }
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  FIFO lot consumption via spLoyalty_RedeemPoints (balance check in the
+  proc, oldest lots first). Run Earn Points (seq 32) before this so the
+  balance covers the redemption. 404 when the company has no program.
+}

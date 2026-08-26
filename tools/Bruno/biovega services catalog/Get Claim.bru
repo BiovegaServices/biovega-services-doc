@@ -13,3 +13,9 @@ get {
 auth:bearer {
   token: {{access_token}}
 }
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+}

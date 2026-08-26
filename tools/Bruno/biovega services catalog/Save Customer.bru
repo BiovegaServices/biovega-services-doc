@@ -1,0 +1,76 @@
+meta {
+  name: Save Customer
+  type: http
+  seq: 39
+}
+
+post {
+  url: {{server}}/odata/v1/Customers?companyId={{companyId}}
+  body: json
+  auth: bearer
+}
+
+params:query {
+  companyId: {{companyId}}
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "firstName": "Iva",
+    "lastName": "Novak",
+    "email": "iva.novak@example.com",
+    "webUserId": 12345,
+    "phone": "+385 1 4855 926",
+    "mobile": "+385 91 612 9739",
+    "gender": "F",
+    "dateOfBirth": "1990-05-14",
+    "householdSize": 3,
+    "childrenCount": 1
+  }
+}
+
+script:post-response {
+  if (res.getStatus() === 201) {
+    bru.setEnvVar("customerId", res.getBody().customerId);
+  }
+}
+
+tests {
+  test("status is 201", function() {
+    expect(res.getStatus()).to.equal(201);
+  });
+
+  test("returns the created customer", function() {
+    const data = res.getBody();
+    expect(data.customerId).to.be.a("string").and.not.be.empty;
+    expect(data.email).to.equal("iva.novak@example.com");
+  });
+
+  test("extended profile is persisted", function() {
+    const data = res.getBody();
+    expect(data.phone).to.equal("+385 1 4855 926");
+    expect(data.mobile).to.equal("+385 91 612 9739");
+    expect((data.gender || "").trim()).to.equal("F");
+    expect(data.householdSize).to.equal(3);
+    expect(data.childrenCount).to.equal(1);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Creates a customer with the FULL profile: names/email plus webUserId (the
+  caller's own user id, e.g. the webshop account), phone, mobile, gender
+  (single character), dateOfBirth, householdSize, childrenCount.
+
+  All profile fields are optional — only email is required. primaryAddressId
+  cannot be set at creation (the customer has no addresses yet) — add an
+  address first, then set it via Update Customer.
+}

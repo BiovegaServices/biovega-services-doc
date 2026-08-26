@@ -1,0 +1,57 @@
+meta {
+  name: Get Order Id Expand
+  type: http
+  seq: 16
+}
+
+get {
+  url: {{server}}/odata/v1/orders?companyId={{companyId}}&orderId={{orderId}}&$expand=OrderItems($expand=Discounts),StatusHistory
+  body: none
+  auth: bearer
+}
+
+params:query {
+  companyId: {{companyId}}
+  orderId: {{orderId}}
+  $expand: OrderItems($expand=Discounts),StatusHistory
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("returns one order with items and status history", function() {
+    const rows = res.getBody().value ?? res.getBody();
+    expect(rows).to.have.lengthOf(1);
+    const order = rows[0];
+    expect(order.OrderItems ?? order.orderItems).to.be.an("array");
+    expect(order.StatusHistory ?? order.statusHistory).to.be.an("array");
+  });
+  
+  test("auto-expanded customer is present", function() {
+    const order = (res.getBody().value ?? res.getBody())[0];
+    expect(order.Customer ?? order.customer).to.not.be.undefined;
+  });
+}
+
+docs {
+  Full expand of one order.
+  
+  Customer, CustomerCard and PaymentMethod are [AutoExpand] — they are
+  always included without asking. This $expand adds the opt-in
+  collections:
+    - OrderItems, and their Discounts via nested expand
+    - StatusHistory (the spOrder_ChangeStatus event log)
+  
+  Other useful variants (swap into the $expand param):
+    - OrderItems                              items only
+    - OrderItems($expand=Discounts)           items + their discounts
+    - StatusHistory                           status log only
+    - OrderItems($select=ProductName,LineTotal;$orderby=LineTotal desc)
+                                              shaped item projection
+}

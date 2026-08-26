@@ -1,0 +1,56 @@
+meta {
+  name: Update Customer
+  type: http
+  seq: 40
+}
+
+put {
+  url: {{server}}/odata/v1/Customers/{{customerId}}?companyId={{companyId}}
+  body: json
+  auth: bearer
+}
+
+params:query {
+  companyId: {{companyId}}
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "customerId": "{{customerId}}",
+    "firstName": "Iva",
+    "lastName": "Novak-Horvat",
+    "email": "iva.novak@example.com",
+    "mobile": "+385 91 612 0000"
+  }
+}
+
+tests {
+  test("status is 204", function() {
+    expect(res.getStatus()).to.equal(204);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Updates the fields supported by spEdit_Customer: firstName, lastName, email
+  plus the extended profile (webUserId, phone, mobile, gender, dateOfBirth,
+  householdSize, childrenCount, customerStatusId, primaryAddressId). The body
+  customerId must match the route id.
+
+  KEEP-EXISTING SEMANTICS: profile fields you OMIT (or send as null) keep
+  their current values — this example changes mobile and keeps phone,
+  gender, dateOfBirth untouched. There is deliberately no way to blank a
+  profile field back to NULL through this endpoint.
+
+  primaryAddressId must be an existing, non-deleted address of THIS customer
+  (see Save Customer Address; its post-response script stores
+  customerAddressId) — anything else returns 400.
+}

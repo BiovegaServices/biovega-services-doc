@@ -1,0 +1,48 @@
+meta {
+  name: Get Order
+  type: http
+  seq: 62
+}
+
+get {
+  url: {{server}}/odata/v1/Orders({{orderId}})?companyId={{companyId}}&$expand=OrderItems($expand=Discounts),StatusHistory,Customer
+  body: none
+  auth: bearer
+}
+
+params:query {
+  companyId: {{companyId}}
+  $expand: OrderItems($expand=Discounts),StatusHistory,Customer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  THE idiomatic single-order fetch: OData keyed access returns ONE entity
+  (not a one-element list). Expand what you need — items with their
+  discounts, the status history, the customer. Both key styles work:
+  /Orders({id}) and /Orders/{id}.
+
+  Get Orders Id (the ?OrderId= query parameter on the list endpoint) is the
+  legacy form and returns a collection envelope — prefer this request.
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("returns a single order entity with items", function() {
+    const data = res.getBody();
+    expect(data.orderId).to.equal(bru.getEnvVar("orderId"));
+    expect(data.orderItems).to.be.an("array");
+    expect(data.statusHistory).to.be.an("array");
+  });
+}

@@ -1,0 +1,59 @@
+﻿meta {
+  name: Save Customer Address Locker
+  type: http
+  seq: 50
+}
+
+post {
+  url: {{server}}/odata/v1/Customers/{{customerId}}/addresses?companyId={{companyId}}
+  body: json
+  auth: bearer
+}
+
+params:query {
+  companyId: {{companyId}}
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "addressTypeId": 7,
+    "carrierId": 1,
+    "pickupPointCode": "ZG-001",
+    "pickupPointName": "Paketomat Ilica",
+    "street": "Ilica 5",
+    "postalCode": "10000",
+    "city": "Zagreb",
+    "country": "HR"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Parcel locker / post station. addressTypeId = PARCEL_LOCKER (7 in THIS
+  dev DB — read it from Get Address Types, it differs per environment);
+  carrierId from Get Carriers (1 = OVERSEAS here).
+
+  carrierId + pickupPointCode are REQUIRED — 400 without them. The
+  street/city/postalCode fields hold the SNAPSHOT of where the locker is,
+  so the address stays readable even if the carrier later moves it.
+}
+
+tests {
+  test("status is 201", function() {
+    expect(res.getStatus()).to.equal(201);
+  });
+
+  test("returns the locker destination", function() {
+    const data = res.getBody();
+    expect(data.pickupPointCode).to.equal("ZG-001");
+    expect(data.carrierId).to.be.a("number");
+  });
+}

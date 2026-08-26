@@ -1,0 +1,45 @@
+meta {
+  name: Get OrderItem Id Expand
+  type: http
+  seq: 22
+}
+
+get {
+  url: {{server}}/odata/v1/orderItems/{{orderItemId}}?companyId={{companyId}}&orderId={{orderId}}&$expand=Discounts
+  body: none
+  auth: bearer
+}
+
+params:query {
+  companyId: {{companyId}}
+  orderId: {{orderId}}
+  $expand: Discounts
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("returns the item with its discounts", function() {
+    const data = res.getBody();
+    expect(data.discounts ?? data.Discounts).to.be.an("array");
+  });
+}
+
+docs {
+  Single order item with its discounts.
+  
+  Discounts is [AutoExpand], so it is already returned even without the
+  $expand below — this request makes it explicit. Percentages are
+  additive (10% + 5% = 15%); FinalUnitPrice / LineTotal already reflect
+  every discount.
+  
+  Useful variant:
+    - $select=ProductName,UnitPrice,FinalUnitPrice,LineTotal
+                                  computed pricing only
+}

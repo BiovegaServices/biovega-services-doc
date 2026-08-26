@@ -1,11 +1,11 @@
 meta {
-  name: Get Version
+  name: Get metadata
   type: http
-  seq: 4
+  seq: 3
 }
 
 get {
-  url: {{server}}/version
+  url: {{server}}/odata/v1/$metadata
   body: none
   auth: bearer
 }

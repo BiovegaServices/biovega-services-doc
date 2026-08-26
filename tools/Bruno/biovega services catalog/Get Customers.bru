@@ -1,17 +1,18 @@
 meta {
-  name: Get Products
+  name: Get Customers
   type: http
-  seq: 7
+  seq: 29
 }
 
 get {
-  url: {{server}}/odata/v1/products?companyId={{companyId}}
+  url: {{server}}/odata/v1/Customers?companyId={{companyId}}&$expand=Cards,Addresses
   body: none
   auth: bearer
 }
 
 params:query {
   companyId: {{companyId}}
+  $expand: Cards
 }
 
 auth:bearer {
@@ -22,10 +23,9 @@ tests {
   test("status is 200", function() {
     expect(res.getStatus()).to.equal(200);
   });
-
+  
   test("returns a result list", function() {
     const body = res.getBody();
-    const rows = body.value ?? body;
-    expect(rows).to.be.an("array");
+    expect(body.value ?? body).to.be.an("array");
   });
 }

@@ -1,0 +1,84 @@
+meta {
+  name: Save Order R1
+  type: http
+  seq: 53
+}
+
+post {
+  url: {{server}}/odata/v1/orders?companyId={{companyId}}
+  body: json
+  auth: bearer
+}
+
+params:query {
+  companyId: {{companyId}}
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "orderNumber": "WEB-2026-R1-0001",
+    "status": "Pending",
+    "isR1Invoice": true,
+    "r1Name": "Singular d.o.o.",
+    "r1Oib": "21058731849",
+    "r1Street": "Stjepana Bencekovića",
+    "r1HouseNumber": "17",
+    "r1PostalCode": "10000",
+    "r1City": "Zagreb",
+    "r1Country": "Hrvatska",
+    "deliveryAddressTypeId": 2,
+    "deliveryRecipientName": "Lea Skender",
+    "deliveryStreet": "Bencekoviceva 23",
+    "deliveryPostalCode": "10000",
+    "deliveryCity": "Zagreb",
+    "deliveryCountry": "Hrvatska",
+    "notes": "Prije dostave zvati na 091/6129-739",
+    "customer": {
+      "customerId": "00000000-0000-0000-0000-000000000000",
+      "firstName": "Lea",
+      "lastName": "Skender",
+      "email": "lea.skender@example.com"
+    },
+    "orderItems": [
+      { "productName": "Knjiga A", "sku": "KNJ-A", "quantity": 1, "unitPrice": 19.90 },
+      { "productName": "Knjiga B", "sku": "KNJ-B", "quantity": 1, "unitPrice": 11.99 }
+    ]
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  R1 invoice order — mirrors the real production erp_r1.xml 1:1: a person
+  orders, the invoice goes to a company (name + OIB + invoice address).
+
+  Validation: with isR1Invoice=true, r1Name + r1Oib + r1Street + r1City are
+  REQUIRED (400 without them). With isR1Invoice=false any supplied r1*
+  fields are DROPPED, not stored (legacy senders always include the block).
+
+  Note the unique orderNumber — rerunning without changing it returns 409.
+}
+
+tests {
+  test("status is 201", function() {
+    expect(res.getStatus()).to.equal(201);
+  });
+
+  test("R1 invoice block is persisted", function() {
+    const data = res.getBody();
+    expect(data.isR1Invoice).to.equal(true);
+    expect(data.r1Name).to.equal("Singular d.o.o.");
+    expect(data.r1Oib).to.equal("21058731849");
+  });
+
+  test("delivery recipient is persisted", function() {
+    expect(res.getBody().deliveryRecipientName).to.equal("Lea Skender");
+  });
+}

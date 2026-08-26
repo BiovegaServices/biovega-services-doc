@@ -1,0 +1,62 @@
+meta {
+  name: Save Customer Card
+  type: http
+  seq: 54
+}
+
+post {
+  url: {{server}}/odata/v1/Customers/{{customerId}}/cards?companyId={{companyId}}
+  body: json
+  auth: bearer
+}
+
+params:query {
+  companyId: {{companyId}}
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "cardNumber": "BV-2026-000042",
+    "isActive": true
+  }
+}
+
+script:post-response {
+  if (res.getStatus() === 201) {
+    bru.setEnvVar("customerCardId", res.getBody().customerCardId);
+    bru.setEnvVar("cardNumber", res.getBody().cardNumber);
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Issues a loyalty card for the customer. The CALLER provides the card
+  number (preprinted / ERP-issued cards) — the API only enforces
+  uniqueness, and card numbers are unique across the WHOLE database:
+  rerunning without changing cardNumber returns 409.
+
+  A customer has at most ONE active card: issuing an active card
+  automatically deactivates the previous one (replacement-card flow).
+  isActive defaults to true when omitted.
+}
+
+tests {
+  test("status is 201", function() {
+    expect(res.getStatus()).to.equal(201);
+  });
+
+  test("returns the issued card", function() {
+    const data = res.getBody();
+    expect(data.customerCardId).to.be.a("string").and.not.be.empty;
+    expect(data.cardNumber).to.equal("BV-2026-000042");
+    expect(data.isActive).to.equal(true);
+  });
+}

@@ -1,0 +1,67 @@
+meta {
+  name: Save Customer Address
+  type: http
+  seq: 49
+}
+
+post {
+  url: {{server}}/odata/v1/Customers/{{customerId}}/addresses?companyId={{companyId}}
+  body: json
+  auth: bearer
+}
+
+params:query {
+  companyId: {{companyId}}
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "addressTypeId": 2,
+    "recipientName": "Baka Marija",
+    "street": "Ilica",
+    "houseNumber": "1",
+    "postalCode": "10000",
+    "city": "Zagreb",
+    "country": "HR",
+    "notes": "Zvoniti na susjeda"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+script:post-response {
+  if (res.getStatus() === 201) {
+    bru.setEnvVar("customerAddressId", res.getBody().customerAddressId);
+  }
+}
+
+docs {
+  Adds a street address (addressTypeId = the DELIVERY row from
+  Get Address Types — 2 in the default seed).
+
+  Required fields depend on the address type:
+    BILLING / DELIVERY -> street
+    PARCEL_LOCKER      -> carrierId + pickupPointCode (see Save Customer
+                          Address Locker)
+    STORE_PICKUP       -> storeId (see Save Customer Address Store Pickup)
+  Anything else returns 400.
+}
+
+tests {
+  test("status is 201", function() {
+    expect(res.getStatus()).to.equal(201);
+  });
+
+  test("returns the created address", function() {
+    const data = res.getBody();
+    expect(data.customerAddressId).to.be.a("string").and.not.be.empty;
+    expect(data.city).to.equal("Zagreb");
+  });
+}

@@ -3,7 +3,7 @@
 This repository contains the documentation for our project.  
 You can browse the full documentation online here:
 
-➡ **[View the Documentation](https://biovegaservices.github.io/biovega-services-doc/)**
+➡ **[View the Documentation](http://doc.biovega.hr/)**
 
 ---
 

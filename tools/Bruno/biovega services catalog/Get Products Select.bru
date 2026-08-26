@@ -1,0 +1,37 @@
+meta {
+  name: Get Products Select
+  type: http
+  seq: 45
+}
+
+get {
+  url: {{server}}/odata/v1/products?companyId={{companyId}}&$select=ProductId,ProductName,ProductCode
+  body: none
+  auth: bearer
+}
+
+params:query {
+  companyId: {{companyId}}
+  $select: ProductId,ProductName,ProductCode
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+docs {
+  Field shaping with $select — returns only the chosen columns. The most
+  effective way to shrink a large bulk payload (skips the AutoExpand
+  Brand/Category/Unit objects too).
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("returns a result list", function() {
+    const body = res.getBody();
+    expect(body.value ?? body).to.be.an("array");
+  });
+}

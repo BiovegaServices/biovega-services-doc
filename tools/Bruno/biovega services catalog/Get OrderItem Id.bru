@@ -1,0 +1,32 @@
+meta {
+  name: Get OrderItem Id
+  type: http
+  seq: 21
+}
+
+get {
+  url: {{server}}/odata/v1/orderItems/{{orderItemId}}?companyId={{companyId}}&orderId={{orderId}}
+  body: none
+  auth: bearer
+}
+
+params:query {
+  companyId: {{companyId}}
+  orderId: {{orderId}}
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("returns the requested item", function() {
+    const data = res.getBody();
+    const id = data.orderItemId ?? data.OrderItemId;
+    expect(id).to.equal(bru.getEnvVar("orderItemId"));
+  });
+}

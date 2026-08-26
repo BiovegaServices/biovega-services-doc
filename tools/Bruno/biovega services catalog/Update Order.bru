@@ -1,0 +1,44 @@
+meta {
+  name: Update Order
+  type: http
+  seq: 25
+}
+
+put {
+  url: {{server}}/odata/v1/orders/{{orderId}}?companyId={{companyId}}
+  body: json
+  auth: bearer
+}
+
+params:query {
+  companyId: {{companyId}}
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "orderId": "{{orderId}}",
+    "orderNumber": "WEB-2026-000124",
+    "status": "Pending"
+  }
+}
+
+tests {
+  test("status is 204", function() {
+    expect(res.getStatus()).to.equal(204);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  The body orderId must match the route id. Server-side field protection
+  forwards the EXISTING values to spEdit_Order. Only works while the order
+  is Pending — 409 afterwards.
+}

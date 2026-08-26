@@ -1,0 +1,40 @@
+meta {
+  name: Get Customer Cards
+  type: http
+  seq: 56
+}
+
+get {
+  url: {{server}}/odata/v1/Customers/{{customerId}}/cards?companyId={{companyId}}
+  body: none
+  auth: bearer
+}
+
+params:query {
+  companyId: {{companyId}}
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Lists all loyalty cards of the customer — active and inactive (an
+  inactive card is history, not deleted). At most one is active at a time.
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("returns a card collection", function() {
+    const data = res.getBody();
+    expect(data.value).to.be.an("array");
+  });
+}

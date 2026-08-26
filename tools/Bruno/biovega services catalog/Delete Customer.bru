@@ -1,0 +1,31 @@
+meta {
+  name: Delete Customer
+  type: http
+  seq: 41
+}
+
+delete {
+  url: {{server}}/odata/v1/Customers/{{customerId}}?companyId={{companyId}}
+  body: none
+  auth: bearer
+}
+
+params:query {
+  companyId: {{companyId}}
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+tests {
+  test("status is 204", function() {
+    expect(res.getStatus()).to.equal(204);
+  });
+}
+
+docs {
+  Soft delete via spDelete_Customer (sets IsDeleted; master data is never
+  hard-deleted). Requires the proc to be deployed — 500 until then.
+  The customer disappears from all read endpoints afterwards.
+}

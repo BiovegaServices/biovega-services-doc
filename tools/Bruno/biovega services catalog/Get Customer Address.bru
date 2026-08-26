@@ -1,0 +1,44 @@
+meta {
+  name: Get Customer Address
+  type: http
+  seq: 59
+}
+
+get {
+  url: {{server}}/odata/v1/Customers/{{customerId}}/addresses/{{customerAddressId}}?companyId={{companyId}}
+  body: none
+  auth: bearer
+}
+
+params:query {
+  companyId: {{companyId}}
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Single saved address by id — the URL a 201 from Save Customer Address
+  points at in its Location header. 404 when the address is soft-deleted,
+  belongs to another customer, or the customer is not in this company.
+
+  customerAddressId is captured by Save Customer Address.
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("returns the requested address", function() {
+    const data = res.getBody();
+    expect(data.customerAddressId).to.equal(bru.getEnvVar("customerAddressId"));
+    expect(data.addressTypeId).to.be.a("number");
+  });
+}

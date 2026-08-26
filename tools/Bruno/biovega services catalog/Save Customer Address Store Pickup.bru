@@ -1,0 +1,54 @@
+﻿meta {
+  name: Save Customer Address Store Pickup
+  type: http
+  seq: 51
+}
+
+post {
+  url: {{server}}/odata/v1/Customers/{{customerId}}/addresses?companyId={{companyId}}
+  body: json
+  auth: bearer
+}
+
+params:query {
+  companyId: {{companyId}}
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "addressTypeId": 8,
+    "storeId": 1
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Pick up at one of the company's own stores. addressTypeId = STORE_PICKUP
+  (8 in THIS dev DB — read it from Get Address Types); storeId from Get Stores.
+
+  HEADS-UP: the DEV companyId (0cda91a6…) has NO stores in viStore, so this
+  request returns 400 there. Point it at a company that has stores, or run it
+  against an environment where Get Stores returns rows.
+
+  storeId is REQUIRED and must belong to this company — a store of another
+  company returns 400. No street fields needed: the store's own address
+  already lives in viStore, so read it via Get Stores.
+}
+
+tests {
+  test("status is 201", function() {
+    expect(res.getStatus()).to.equal(201);
+  });
+
+  test("returns the store destination", function() {
+    expect(res.getBody().storeId).to.be.a("number");
+  });
+}

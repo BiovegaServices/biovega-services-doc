@@ -1,17 +1,18 @@
 meta {
-  name: Get Products
+  name: Get Products expand StoreInventory
   type: http
-  seq: 7
+  seq: 10
 }
 
 get {
-  url: {{server}}/odata/v1/products?companyId={{companyId}}
+  url: {{server}}/odata/v1/products?companyId={{companyId}}&$expand=StoreInventory
   body: none
   auth: bearer
 }
 
 params:query {
   companyId: {{companyId}}
+  $expand: StoreInventory
 }
 
 auth:bearer {

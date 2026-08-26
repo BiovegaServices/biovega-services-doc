@@ -1,11 +1,11 @@
 meta {
   name: Get Token
   type: http
-  seq: 1
+  seq: 2
 }
 
 post {
-  url: https://login.microsoftonline.com/.../oauth2/v2.0/token
+  url: https://login.microsoftonline.com/09ad4a25-94e1-4731-9363-b3bcf611e5ba/oauth2/v2.0/token
   body: formUrlEncoded
   auth: basic
 }
@@ -27,11 +27,21 @@ body:form-urlencoded {
 script:post-response {
   // Bruno automatically parses JSON responses
   const data = res.body;
-  
+
   // Save the access token into an environment variable
   bru.setEnvVar("access_token", data.access_token);
-  
+
   // Optional: confirm it worked
   console.log("Access token saved to environment");
-  
+
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("returns an access token", function() {
+    expect(res.getBody().access_token).to.be.a("string").and.not.be.empty;
+  });
 }

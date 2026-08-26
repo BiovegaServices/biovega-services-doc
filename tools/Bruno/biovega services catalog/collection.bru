@@ -2,4 +2,44 @@ meta {
   name: Biovega Services Catalog
 }
 
+auth {
+  mode: oauth2
+}
 
+auth:oauth2 {
+  grant_type: authorization_code
+  callback_url: 
+  authorization_url: 
+  access_token_url: 
+  refresh_token_url: 
+  client_id: 
+  client_secret: 
+  scope: 
+  state: 
+  pkce: false
+  credentials_placement: body
+  credentials_id: credentials
+  token_placement: header
+  token_header_prefix: Bearer
+  auto_fetch_token: true
+  auto_refresh_token: false
+}
+
+docs {
+  Biovega Services Catalog API — contract prefix /odata/v1 (the unversioned
+  /odata prefix still answers but carries Deprecation headers).
+
+  RUN ORDER for a full walkthrough: Get Token → lookups (Get Address Types,
+  Get Payment Methods, Get Discount Types, Get Carriers, Get Customer
+  Statuses) → Save Customer → Save Customer Address / Card → Save Order All
+  → Get Order → Change Order Status → Earn / Redeem Points.
+
+  Every tenant-scoped request needs ?companyId={{companyId}}; a missing or
+  foreign companyId returns 404 (never 403). Errors on /odata/v1 come back
+  as {"error":{"code","message"}}. Ids from lookups differ per environment
+  — the post-response scripts capture them into env variables.
+
+  Field-by-field mapping from the legacy ERP XML: docs/erp-to-api-mapping.html
+  (English) and docs/erp-to-api-mapping-hr.html (hrvatski) in the
+  biovega-services-tools repository.
+}

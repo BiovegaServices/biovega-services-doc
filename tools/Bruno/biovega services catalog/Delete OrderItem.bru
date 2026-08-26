@@ -1,0 +1,30 @@
+meta {
+  name: Delete OrderItem
+  type: http
+  seq: 24
+}
+
+delete {
+  url: {{server}}/odata/v1/orderItems/{{orderItemId}}?companyId={{companyId}}&orderId={{orderId}}
+  body: none
+  auth: bearer
+}
+
+params:query {
+  companyId: {{companyId}}
+  orderId: {{orderId}}
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+tests {
+  test("status is 204", function() {
+    expect(res.getStatus()).to.equal(204);
+  });
+}
+
+docs {
+  Only works while the parent order is Pending — 409 afterwards.
+}

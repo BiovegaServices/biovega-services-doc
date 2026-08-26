@@ -1,0 +1,43 @@
+meta {
+  name: Change Order Status
+  type: http
+  seq: 26
+}
+
+post {
+  url: {{server}}/odata/v1/orders/{{orderId}}/status?companyId={{companyId}}
+  body: json
+  auth: bearer
+}
+
+params:query {
+  companyId: {{companyId}}
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "toStatus": "Paid",
+    "reason": "Bruno collection run"
+  }
+}
+
+tests {
+  test("status is 204", function() {
+    expect(res.getStatus()).to.equal(204);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Atomic status change via spOrder_ChangeStatus — also writes an
+  OrderStatusHistory row. After this the order is LOCKED: order/item
+  edits and deletes return 409. Requires the proc to be deployed.
+}

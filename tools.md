@@ -27,3 +27,7 @@ This repository serves as the **toolbox** for the Biovega Service projects:
 - Makes onboarding easier for new contributors by collecting everything in one place.
 
 ---
+
+Next: [Tutorials]({{ site.baseurl }}/tutorials)
+
+---

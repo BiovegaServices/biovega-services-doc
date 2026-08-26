@@ -1,11 +1,11 @@
 meta {
-  name: Get Products
+  name: Get Stores Shipping
   type: http
-  seq: 7
+  seq: 13
 }
 
 get {
-  url: {{server}}/odata/v1/products?companyId={{companyId}}
+  url: {{server}}/odata/v1/stores/shipping?companyId={{companyId}}
   body: none
   auth: bearer
 }

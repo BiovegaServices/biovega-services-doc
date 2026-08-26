@@ -2,8 +2,8 @@ title: "Biovega Services"
 description: "Official documentation for Biovega d.o.o. digital services"
 
 # GitHub Pages URL configuration
-url: "https://biovega.github.io"
-baseurl: "/biovega-services-doc"   # MUST match your repo name exactly
+url: "http://doc.platform.biovega.hr"
+baseurl: "/"   # MUST match your repo name exactly
 
 # logo: "/assets/images/biovegaservices.png"
 
