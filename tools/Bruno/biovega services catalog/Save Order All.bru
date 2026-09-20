@@ -160,7 +160,10 @@ docs {
          PARCEL_LOCKER    -> deliveryCarrierId + deliveryPickupPointCode
                              (street/city hold the locker's snapshot)
          STORE_PICKUP     -> deliveryStoreId, a store of THIS company
-       Omit deliveryAddressTypeId entirely for an order with no destination.
+       Omit deliveryAddressTypeId entirely for an order with no destination —
+       but then omit ALL delivery* fields: delivery fields without a chosen
+       destination (no deliveryAddressTypeId and no deliveryAddressId) are a
+       400 naming the stray fields, never a silent drop.
 
   OTHER VALIDATION: orderNumber must be unique per company (else 409); status
   must be a known OrderStatuses value; paymentMethodId and every discountTypeId
