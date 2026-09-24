@@ -64,13 +64,12 @@ docs {
   Adds an item to a Pending order (409 otherwise). Discounts are created
   together with the item and cannot be changed afterwards.
 
-  Optional product references (all stored as sent):
-    - productErpId: int product id from GET /odata/v1/Products. Must be a
+  Optional fields:
+    - productId:   int product id from GET /odata/v1/Products. Must be a
       product of the company, otherwise 400.
-    - productId:    Guid product reference of the caller (not validated).
-    - retailPrice:  reference price, not used in totals; must not be negative.
-    - shopPrice:    your final price for the whole line, stored as sent (not
-      used in our totals); omit on update to keep it.
+    - retailPrice: reference price, not used in totals; must not be negative.
+    - shopPrice:   your final price for the whole line, stored as sent (not
+      used in our totals).
 
   Amounts use 4 decimals.
 }
