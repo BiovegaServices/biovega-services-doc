@@ -36,8 +36,9 @@ docs {
 
   The same endpoint also REACTIVATES (isActive: true) — which deactivates
   any other active card of the customer (max one active) — and can correct
-  the card number; an omitted/empty cardNumber keeps the existing one.
-  A cardNumber already used by another card returns 409.
+  the card number; an omitted/empty cardNumber keeps the existing one, and
+  an omitted isActive keeps the current state. A cardNumber already used by
+  another card returns 409.
 }
 
 tests {

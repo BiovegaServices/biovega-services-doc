@@ -13,6 +13,7 @@ get {
 params:query {
   companyId: {{companyId}}
   customerId: {{customerId}}
+  ~loyaltyProgramId: {{loyaltyProgramId}}
 }
 
 auth:bearer {
@@ -32,6 +33,11 @@ tests {
 }
 
 docs {
-  Aggregated from non-expired EARN lots (viCustomerPointsBalance).
-  A customer without loyalty activity gets a zero balance.
+  Aggregated from non-expired earned points. A customer without loyalty
+  activity gets a zero balance.
+
+  Without loyaltyProgramId the balance is summed over all of the customer's
+  programs (loyaltyProgramId in the response is null). Enable the
+  loyaltyProgramId param for one program's balance; a program of another
+  company returns 404.
 }

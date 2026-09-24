@@ -29,8 +29,8 @@ body:json {
 }
 
 tests {
-  test("redeems points or has no program", function() {
-    expect([200, 404]).to.include(res.getStatus());
+  test("redeems points, has no program, or balance too low", function() {
+    expect([200, 404, 409]).to.include(res.getStatus());
   });
   
   test("returns the updated balance on success", function() {
@@ -50,5 +50,7 @@ settings {
 docs {
   FIFO lot consumption via spLoyalty_RedeemPoints (balance check in the
   proc, oldest lots first). Run Earn Points (seq 32) before this so the
-  balance covers the redemption. 404 when the company has no program.
+  balance covers the redemption. 404 when the company has no program;
+  409 when the points exceed the available balance (nothing is consumed).
+  The response is the balance of the redeemed program.
 }
